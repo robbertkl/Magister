@@ -4,6 +4,8 @@ const async = require('async');
 const EventEmitter = require('events');
 const Magister = require('magister.js');
 
+const primaryClasses = ['ne', 'fa', 'en', 'wi', 'gs', 'lv', 'ak', 'bi', 'mu'];
+
 module.exports = function(credentials, options) {
 	options = options || {};
 	options.interval = options.interval || 10 * 60 * 1000;
@@ -28,13 +30,14 @@ module.exports = function(credentials, options) {
 					for (let grade of gradesResult.grades) {
 						const gradeClass = grade.class();
 						emitter.emit('grade', {
-              grade: grade.grade(),
+              grade: +(grade.grade().replace(',', '.')),
 							isPass: grade.passed(),
 							description: grade.description(),
 							weight: grade.weight(),
 							className: getFullClassName(gradeClass, classesById),
-							classAverage: gradesResult.averages[gradeClass.id].grade(),
-							overallAverage: gradesResult.overallGrade.grade(),
+							classAverage: gradesResult.averages[gradeClass.id],
+							overallAverage: gradesResult.overallGrade,
+							overallPoints: gradesResult.overallPoints,
 						});
 					}
 				});
@@ -82,6 +85,9 @@ function fetchNewGrades(course, latestGradeTime, callback) {
 		let overallAverage = null;
 		let newLatestGradeTime = latestGradeTime;
 
+		let primaryClassesTotal = 0;
+		let primaryClassesCount = 0;
+
 		for (let grade of grades) {
 			const gradeType = grade.type();
 			const gradePeriod = grade.gradePeriod();
@@ -89,22 +95,32 @@ function fetchNewGrades(course, latestGradeTime, callback) {
 
 			if (gradePeriod.name == 'EIND') {
 				if (gradeClass.abbreviation == 'gem') {
-					overallAverage = grade;
+					overallAverage = +(grade.grade().replace(',', '.'));
 				} else {
-					classAverages[gradeClass.id] = grade;
+					classAverages[gradeClass.id] = +(grade.grade().replace(',', '.'));
+					if (primaryClasses.indexOf(gradeClass.abbreviation) >= 0) {
+						primaryClassesTotal += +(grade.grade().replace(',', '.'));
+						primaryClassesCount++;
+					}
 				}
-			} else if (gradeType.typeString() == "grade") {
+			} else if (gradeType.typeString() == 'grade') {
 				if (grade.dateFilledIn() <= latestGradeTime) continue;
 				gradesToNotify.push(grade);
 				if (grade.dateFilledIn() > newLatestGradeTime) newLatestGradeTime = grade.dateFilledIn();
 			}
 		}
 
+		if (!overallAverage) {
+			// No more overall grade in overview, let's calculate it ourselves
+			overallAverage = Math.floor(10 * primaryClassesTotal / primaryClassesCount) / 10;
+		}
+
 		callback(null, {
 			grades: gradesToNotify,
 			averages: classAverages,
 			overallGrade: overallAverage,
-			latestGradeTime: newLatestGradeTime
+			overallPoints: primaryClassesTotal,
+			latestGradeTime: newLatestGradeTime,
 		});
 	});
 }

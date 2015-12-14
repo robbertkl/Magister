@@ -44,11 +44,12 @@ gradeNotifier.on('grade', function(grade) {
 
   const htmlText =
     `Je hebt voor ${grade.className} het volgende cijfer gehaald:<br><br>` +
-    `<font size="96" color="${color}">${grade.grade}</font><br>` +
+    `<font size="96" color="${color}">${grade.grade.toString().replace('.', ',')}</font><br>` +
     (grade.description ? `(${grade.description})<br>` : '') +
     '<br>' +
     `Dit cijfer telt ${grade.weight} keer mee.<br>` +
-    `Voor ${grade.className} sta je nu een ${grade.classAverage} en je eindgemiddelde is een ${grade.overallAverage}.<br>`;
+    `Voor ${grade.className} sta je nu een ${grade.classAverage} en je eindgemiddelde is een ${grade.overallAverage.toString().replace('.', ',')}.<br>` +
+    `VWO tussenstand: ${grade.overallPoints}/67 punten.<br>`;
 
   const plainText = htmlText.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '');
 
