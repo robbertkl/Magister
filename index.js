@@ -4,7 +4,7 @@ const async = require('async');
 const EventEmitter = require('events');
 const Magister = require('magister.js');
 
-const primaryClasses = ['ne', 'fa', 'en', 'wi', 'gs', 'lv', 'ak', 'bi', 'mu'];
+const primaryClasses = ['ne', 'fa', 'en', 'wi', 'gs', 'lv', 'ak', 'bi', 'mu', 'te'];
 
 module.exports = function(credentials, options) {
 	options = options || {};
