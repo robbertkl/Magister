@@ -1,6 +1,6 @@
-# Magister grades
+# Magister
 
-[![](https://badge.imagelayers.io/robbertkl/magister-grades:latest.svg)](https://imagelayers.io/?images=robbertkl/magister-grades:latest)
+[![](https://badge.imagelayers.io/robbertkl/magister:latest.svg)](https://imagelayers.io/?images=robbertkl/magister:latest)
 
 E-mail notifier for new grades posted on Magister
 
@@ -28,14 +28,14 @@ docker run -d --restart=always \
   -e MAGISTER_PASSWORD=xxx \
   -e RECIPIENTS=recipient1@example.org,recipient2@example.org \
   -e SENDER="Magister <magister@example.org>" \
-  robbertkl/magister-grades
+  robbertkl/magister
 ```
 
 Docker-compose:
 
 ```yaml
-magister-grades:
-  image: robbertkl/magister-grades
+magister:
+  image: robbertkl/magister
   restart: always
   environment:
     - MAGISTER_SCHOOL=xxx

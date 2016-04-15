@@ -1,5 +1,4 @@
-NAME = robbertkl/magister-grades
-
+NAME = robbertkl/magister
 all:: build
 
 build:
