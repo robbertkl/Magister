@@ -1,4 +1,4 @@
-FROM robbertkl/node
+FROM robbertkl/node:latest
 MAINTAINER Robbert Klarenbeek <robbertkl@renbeek.nl>
 
 COPY package.json ./
