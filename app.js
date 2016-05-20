@@ -9,7 +9,7 @@ if (!process.env.SENDER || !process.env.RECIPIENTS) {
 
 const recipients = process.env.RECIPIENTS.split(/\s*,\s*/);
 const sender = process.env.SENDER;
-const mailer = nodemailer.createTransport({ host: 'mail', port: 587 });
+const mailer = nodemailer.createTransport({ host: 'mail', port: 587, ignoreTLS: true });
 
 if (!process.env.MAGISTER_SCHOOL || !process.env.MAGISTER_USERNAME || !process.env.MAGISTER_PASSWORD) {
   console.error('Error: MAGISTER_ environment variables are not set; exiting...');
