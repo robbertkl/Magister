@@ -4,8 +4,6 @@ const async = require('async');
 const EventEmitter = require('events');
 const Magister = require('magister.js');
 
-const primaryClasses = ['ne', 'fa', 'en', 'wi', 'gs', 'lv', 'ak', 'bi', 'mu', 'te'];
-
 module.exports = function(credentials, options) {
 	options = options || {};
 	options.interval = options.interval || 10 * 60 * 1000;
@@ -30,14 +28,13 @@ module.exports = function(credentials, options) {
 					for (let grade of gradesResult.grades) {
 						const gradeClass = grade.class();
 						emitter.emit('grade', {
-              grade: +(grade.grade().replace(',', '.')),
+              grade: parseFloat(grade.grade().replace(',', '.')),
 							isPass: grade.passed(),
 							description: grade.description(),
 							weight: grade.weight(),
 							className: getFullClassName(gradeClass, classesById),
 							classAverage: gradesResult.averages[gradeClass.id],
 							overallAverage: gradesResult.overallGrade,
-							overallPoints: gradesResult.overallPoints,
 						});
 					}
 				});
@@ -85,23 +82,17 @@ function fetchNewGrades(course, latestGradeTime, callback) {
 		let overallAverage = null;
 		let newLatestGradeTime = latestGradeTime;
 
-		let primaryClassesTotal = 0;
-		let primaryClassesCount = 0;
-
 		for (let grade of grades) {
 			const gradeType = grade.type();
-			const gradePeriod = grade.gradePeriod();
+			const gradePeriod = grade.period();
 			const gradeClass = grade.class();
+			const gradeGrade = parseFloat(grade.grade().replace(',', '.'));
 
-			if (gradePeriod.name == 'EIND') {
+			if (gradePeriod.name() == 'EIND') {
 				if (gradeClass.abbreviation == 'gem') {
-					overallAverage = +(grade.grade().replace(',', '.'));
+					overallAverage = gradeGrade;
 				} else {
-					classAverages[gradeClass.id] = +(grade.grade().replace(',', '.'));
-					if (primaryClasses.indexOf(gradeClass.abbreviation) >= 0) {
-						primaryClassesTotal += +(grade.grade().replace(',', '.'));
-						primaryClassesCount++;
-					}
+					classAverages[gradeClass.id] = gradeGrade;
 				}
 			} else if (gradeType.typeString() == 'grade') {
 				if (grade.dateFilledIn() <= latestGradeTime) continue;
@@ -110,16 +101,10 @@ function fetchNewGrades(course, latestGradeTime, callback) {
 			}
 		}
 
-		if (!overallAverage) {
-			// No more overall grade in overview, let's calculate it ourselves
-			overallAverage = Math.floor(10 * primaryClassesTotal / primaryClassesCount) / 10;
-		}
-
 		callback(null, {
 			grades: gradesToNotify,
 			averages: classAverages,
 			overallGrade: overallAverage,
-			overallPoints: primaryClassesTotal,
 			latestGradeTime: newLatestGradeTime,
 		});
 	});
@@ -130,6 +115,9 @@ function getFullClassName(gradeClass, classesById) {
 	if (gradeClass.id in classesById) {
 		className = classesById[gradeClass.id].description();
 		className = className.replace(/e taal$/i, '');
+		className = className.replace(/^cambridge.*$/i, 'engels');
+		className = className.replace(/^latijn.*$/i, 'latijn');
+		className = className.replace(/^grieks.*$/i, 'grieks');
 		className = className.replace(/^levensbesch.*$/i, 'levensbeschouwing');
 		className = className.replace(/^lichamelijke opv.*$/i, 'gym');
 		className = className.replace(/^informatiekund.*$/i, 'informatiekunde');

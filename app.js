@@ -41,15 +41,17 @@ gradeNotifier.on('grade', function(grade) {
   logInfo('Found grade');
 
   const color = grade.isPass ? '#3fca02' : '#e0311f';
+  grade.grade = grade.grade.toLocaleString('nl-NL');
+  grade.classAverage = grade.classAverage.toLocaleString('nl-NL');
+  grade.overallAverage = grade.overallAverage.toLocaleString('nl-NL');
 
   const htmlText =
     `Je hebt voor ${grade.className} het volgende cijfer gehaald:<br><br>` +
-    `<font size="96" color="${color}">${grade.grade.toString().replace('.', ',')}</font><br>` +
+    `<font size="96" color="${color}">${grade.grade}</font><br>` +
     (grade.description ? `(${grade.description})<br>` : '') +
     '<br>' +
     `Dit cijfer telt ${grade.weight} keer mee.<br>` +
-    `Voor ${grade.className} sta je nu een ${grade.classAverage} en je eindgemiddelde is een ${grade.overallAverage.toString().replace('.', ',')}.<br>` +
-    `VWO tussenstand: ${grade.overallPoints}/74 punten.<br>`;
+    `Voor ${grade.className} sta je nu een ${grade.classAverage} en je eindgemiddelde is een ${grade.overallAverage}.<br>`;
 
   const plainText = htmlText.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '');
 
