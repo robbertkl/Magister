@@ -118,6 +118,8 @@ function getFullClassName(gradeClass, classesById) {
 		className = className.replace(/^cambridge.*$/i, 'engels');
 		className = className.replace(/^latijn.*$/i, 'latijn');
 		className = className.replace(/^grieks.*$/i, 'grieks');
+		className = className.replace(/^spaans.*$/i, 'spaans');
+		className = className.replace(/^nederlands.*$/i, 'nederlands');
 		className = className.replace(/^levensbesch.*$/i, 'levensbeschouwing');
 		className = className.replace(/^lichamelijke opv.*$/i, 'gym');
 		className = className.replace(/^informatiekund.*$/i, 'informatiekunde');
