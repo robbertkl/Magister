@@ -2,8 +2,8 @@
   "name": "magister",
   "version": "1.0.0",
   "dependencies": {
-    "async": "^2.6.1",
-    "magister.js": "^1.24.2",
+    "async": "^2.6.2",
+    "magister.js": "^2.0.0-alpha.12",
     "nodemailer": "^2.7.2"
   }
 }

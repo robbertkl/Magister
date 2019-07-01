@@ -12,34 +12,33 @@ module.exports = function(credentials, options) {
 	const emitter = new EventEmitter();
 	let latestGradeTime = options.startDate;
 
-	let checkGrades = function() {
-		new Magister.Magister(credentials).ready(function(error) {
-			if (error) return emitter.emit('error', normalizeError(error));
-			this.currentCourse(function(error, course) {
-        if (error) return emitter.emit('error', normalizeError(error));
-				async.parallel([
-					fetchClasses.bind(null, course),
-					fetchNewGrades.bind(null, course, latestGradeTime),
-				], function(error, results) {
-          if (error) return emitter.emit('error', normalizeError(error));
-					const classesById = results[0];
-					const gradesResult = results[1];
-					latestGradeTime = gradesResult.latestGradeTime;
-					for (let grade of gradesResult.grades) {
-						const gradeClass = grade.class();
-						emitter.emit('grade', {
-              grade: parseFloat(grade.grade().replace(',', '.')),
-							isPass: grade.passed(),
-							description: grade.description(),
-							weight: grade.weight(),
-							className: getFullClassName(gradeClass, classesById),
-							classAverage: gradesResult.averages[gradeClass.id],
-							overallAverage: gradesResult.overallGrade,
-						});
-					}
+	let checkGrades = async function() {
+		try {
+			if (typeof credentials.school == 'string') {
+				const schools = await Magister.getSchools(credentials.school);
+				credentials.school = schools.find(school => school.name == credentials.school);				
+			}
+			const magister = await Magister.default(credentials);
+			const course = (await magister.courses()).pop();
+			
+			const classesById = await fetchClasses(course);
+			const gradesResult = await fetchNewGrades(course, latestGradeTime);
+			
+			latestGradeTime = gradesResult.latestGradeTime;
+			for (let grade of gradesResult.grades) {
+				const gradeClass = grade.class;
+				emitter.emit('grade', {
+				  grade: parseFloat(grade.grade.replace(',', '.')),
+					isPass: grade.passed,
+					description: grade.description,
+					weight: grade.weight,
+					className: getFullClassName(gradeClass, classesById),
+					classAverage: gradesResult.averages[gradeClass.id],
 				});
-			});
-		});
+			}
+		} catch (error) {
+			emitter.emit('error', normalizeError(error));
+		}
 	};
 
 	setTimeout(checkGrades, 0);
@@ -52,68 +51,48 @@ module.exports = function(credentials, options) {
 	return emitter;
 }
 
-function fetchClasses(course, callback) {
-	let callbackCalled = false;
-	course.classes(function(error, courseClasses) {
-		if (callbackCalled) return;
-		callbackCalled = true;
-
-		if (error) return callback(error);
-
-		let classesById = {};
-		for (let courseClass of courseClasses) {
-			classesById[courseClass.id()] = courseClass;
-		}
-
-		callback(null, classesById);
-	});
+async function fetchClasses(course) {
+	return (await course.classes()).reduce((classesById, courseClass) => {
+		classesById[courseClass.id] = courseClass;
+		return classesById;
+	}, {});
 }
 
-function fetchNewGrades(course, latestGradeTime, callback) {
-	let callbackCalled = false;
-	course.grades(false, true, function(error, grades) {
-		if (callbackCalled) return;
-		callbackCalled = true;
+async function fetchNewGrades(course, latestGradeTime, callback) {
+	let gradesToNotify = [];
+	let classAverages = {};
+	let overallAverage = null;
+	let newLatestGradeTime = latestGradeTime;
 
-		if (error) return callback(error);
-
-		let gradesToNotify = [];
-		let classAverages = {};
-		let overallAverage = null;
-		let newLatestGradeTime = latestGradeTime;
-
-		for (let grade of grades) {
-			const gradeType = grade.type();
-			const gradePeriod = grade.period();
-			const gradeClass = grade.class();
-			const gradeGrade = parseFloat(grade.grade().replace(',', '.'));
-
-			if (gradePeriod.name() == 'EIND') {
-				if (gradeClass.abbreviation == 'gem') {
-					overallAverage = gradeGrade;
-				} else {
-					classAverages[gradeClass.id] = gradeGrade;
-				}
-			} else if (gradeType.typeString() == 'grade') {
-				if (grade.dateFilledIn() <= latestGradeTime) continue;
-				gradesToNotify.push(grade);
-				if (grade.dateFilledIn() > newLatestGradeTime) newLatestGradeTime = grade.dateFilledIn();
+	for (const grade of await course.grades()) {
+		const gradeType = grade.type;
+		const gradeClass = grade.class;
+		const gradeGrade = parseFloat(grade.grade.replace(',', '.'));
+		
+		if (gradeType.header == 'EIND') {
+			if (gradeClass.abbreviation == 'gem') {
+				overallAverage = gradeGrade;
+			} else {
+				classAverages[gradeClass.id] = gradeGrade;
 			}
+		} else if (gradeType._type == 1) {
+			if (grade.dateFilledIn <= latestGradeTime) continue;
+			gradesToNotify.push(grade);
+			if (grade.dateFilledIn > newLatestGradeTime) newLatestGradeTime = grade.dateFilledIn;
 		}
+	}
 
-		callback(null, {
-			grades: gradesToNotify,
-			averages: classAverages,
-			overallGrade: overallAverage,
-			latestGradeTime: newLatestGradeTime,
-		});
-	});
+	return {
+		grades: gradesToNotify,
+		averages: classAverages,
+		latestGradeTime: newLatestGradeTime,
+	};
 }
 
 function getFullClassName(gradeClass, classesById) {
 	let className = gradeClass.abbreviation;
 	if (gradeClass.id in classesById) {
-		className = classesById[gradeClass.id].description();
+		className = classesById[gradeClass.id].description;
 		className = className.replace(/e taal$/i, '');
 		className = className.replace(/^cambridge.*$/i, 'engels');
 		className = className.replace(/^latijn.*$/i, 'latijn');
