@@ -3,6 +3,7 @@
 const async = require('async');
 const EventEmitter = require('events');
 const Magister = require('magister.js');
+const getAuthCode = require('@magisterjs/dynamic-authcode');
 
 module.exports = function(credentials, options) {
 	options = options || {};
@@ -18,6 +19,9 @@ module.exports = function(credentials, options) {
 				const schools = await Magister.getSchools(credentials.school);
 				credentials.school = schools.find(school => school.name == credentials.school);				
 			}
+
+			credentials.authCode = await getAuthCode();
+
 			const magister = await Magister.default(credentials);
 			const course = (await magister.courses()).pop();
 			

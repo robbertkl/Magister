@@ -2,6 +2,7 @@
   "name": "magister",
   "version": "1.0.0",
   "dependencies": {
+    "@magisterjs/dynamic-authcode": "^1.1.0",
     "async": "^2.6.2",
     "magister.js": "^2.0.0-alpha.12",
     "nodemailer": "^2.7.2"
