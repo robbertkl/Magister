@@ -20,7 +20,9 @@ module.exports = function(credentials, options) {
 				credentials.school = schools.find(school => school.name == credentials.school);				
 			}
 
-			credentials.authCode = await getAuthCode();
+			if (!('authCode' in credentials)) {
+				credentials.authCode = await getAuthCode();
+			}
 
 			const magister = await Magister.default(credentials);
 			const course = (await magister.courses()).pop();

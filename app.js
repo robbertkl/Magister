@@ -22,6 +22,8 @@ const credentials = {
   password: process.env.MAGISTER_PASSWORD,
 };
 
+if (process.env.MAGISTER_AUTHCODE) credentials.authCode = process.env.MAGISTER_AUTHCODE;
+
 let shouldExitAfterFirstCheck = false;
 let options = {};
 
