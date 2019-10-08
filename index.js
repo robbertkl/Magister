@@ -3,7 +3,7 @@
 const async = require('async');
 const EventEmitter = require('events');
 const Magister = require('magister.js');
-const getAuthCode = require('@magisterjs/dynamic-authcode');
+const getAuthCode = require('magister-authcode');
 
 module.exports = function(credentials, options) {
 	options = options || {};
