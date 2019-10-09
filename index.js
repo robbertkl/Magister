@@ -43,7 +43,18 @@ module.exports = function(credentials, options) {
 				});
 			}
 		} catch (error) {
-			emitter.emit('error', normalizeError(error));
+			const normalizedError = normalizeError(error);
+			if (normalizedError.message == 'Invalid username') {
+				try {
+					const newAuthCode = await getAuthCode();
+					if (newAuthCode != credentials.authCode) {
+						// Ignore the error and try again next time
+						credentials.authCode = newAuthCode;
+						return;
+					}
+				} catch (error) {}
+			}
+			emitter.emit('error', normalizedError);
 		}
 	};
 
