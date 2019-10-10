@@ -44,13 +44,19 @@ gradeNotifier.on('grade', function(grade) {
 
   const color = grade.isPass ? '#3fca02' : '#e0311f';
   grade.grade = grade.grade.toLocaleString('nl-NL');
-  grade.classAverage = grade.classAverage.toLocaleString('nl-NL');
 
   let overallAverageText = '';
   if (grade.overallAverage) {
     grade.overallAverage = grade.overallAverage.toLocaleString('nl-NL');
-    overallAverageText = ` en je eindgemiddelde is een ${grade.overallAverage}`
+    overallAverageText = ` en je eindgemiddelde is een ${grade.overallAverage}`;
   }
+  
+  let classAverageText = '';
+  if (grade.classAverage) {
+    grade.classAverage = grade.classAverage.toLocaleString('nl-NL');
+    classAverageText = `Voor ${grade.className} sta je nu een ${grade.classAverage}${overallAverageText}.`;
+  }
+
 
   const htmlText =
     `Je hebt voor ${grade.className} het volgende cijfer gehaald:<br><br>` +
@@ -58,7 +64,7 @@ gradeNotifier.on('grade', function(grade) {
     (grade.description ? `(${grade.description})<br>` : '') +
     '<br>' +
     `Dit cijfer telt ${grade.weight} keer mee.<br>` +
-    `Voor ${grade.className} sta je nu een ${grade.classAverage}${overallAverageText}.<br>`;
+    `${classAverageText}<br>`;
 
   const plainText = htmlText.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '');
 
