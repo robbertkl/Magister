@@ -57,7 +57,6 @@ gradeNotifier.on('grade', function(grade) {
     classAverageText = `Voor ${grade.className} sta je nu een ${grade.classAverage}${overallAverageText}.`;
   }
 
-
   const htmlText =
     `Je hebt voor ${grade.className} het volgende cijfer gehaald:<br><br>` +
     `<font size="96" color="${color}">${grade.grade}</font><br>` +
@@ -72,7 +71,7 @@ gradeNotifier.on('grade', function(grade) {
     const mailOptions = {
       to: recipient,
       from: sender,
-      subject: `Nieuw cijfer voor ${grade.className}`,
+      subject: `[${grade.firstName}] Nieuw cijfer voor ${grade.className}`,
       text: plainText,
       html: htmlText,
     };

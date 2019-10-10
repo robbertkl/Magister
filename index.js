@@ -40,6 +40,7 @@ module.exports = function(credentials, options) {
 					weight: grade.weight,
 					className: getFullClassName(gradeClass, classesById),
 					classAverage: gradesResult.averages[gradeClass.id],
+					firstName: magister.profileInfo.firstName,
 				});
 			}
 		} catch (error) {
