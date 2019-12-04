@@ -1,0 +1,26 @@
+diff --git a/lib/magister.js b/lib/magister.js
+index 37f43c4..2adfddd 100644
+--- a/node_modules/magister.js/lib/magister.js
++++ b/node_modules/magister.js/lib/magister.js
+@@ -582,7 +582,7 @@ class Magister {
+     const xsrfResponse = await this.http.get(location, {
+       redirect: 'manual'
+     });
+-    const authUrl = 'https://accounts.magister.net/challenge';
++    const authUrl = 'https://accounts.magister.net/challenges';
+     let sessionId;
+     let xsrf;
+     let authCookies;
+diff --git a/src/magister.js b/src/magister.js
+index 7e4eab5..9ef54f0 100644
+--- a/node_modules/magister.js/src/magister.js
++++ b/node_modules/magister.js/src/magister.js
+@@ -454,7 +454,7 @@ class Magister {
+ 			redirect: 'manual',
+ 		})
+ 
+-		const authUrl = 'https://accounts.magister.net/challenge'
++		const authUrl = 'https://accounts.magister.net/challenges'
+ 		let sessionId
+ 		let xsrf
+ 		let authCookies
