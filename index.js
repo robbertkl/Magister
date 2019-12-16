@@ -45,7 +45,7 @@ module.exports = function(credentials, options) {
 			}
 		} catch (error) {
 			const normalizedError = normalizeError(error);
-			if (normalizedError.message == 'Invalid username') {
+			if (normalizedError.message == 'Error: AuthCodeValidation') {
 				try {
 					const newAuthCode = await getAuthCode();
 					if (newAuthCode != credentials.authCode) {
